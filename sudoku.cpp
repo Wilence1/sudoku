@@ -15,17 +15,17 @@ namespace sudoku {
         }
     };
 
+    template <class CoordSet, class ValueSet>
     class Constraint {
     public:
-        virtual bool check(void) const = 0;
+        virtual bool check(const SolutionIdea<CoordSet, ValueSet>&) const = 0;
     };
 
     template <class CoordSet, class ValueSet>
-    class UniqueConstraint : public Constraint {
+    class UniqueConstraint : public Constraint<CoordSet, ValueSet> {
     public:
-        SolutionIdea<CoordSet, ValueSet> idea;
         CoordSet area;
-        bool check(void) const override {
+        bool check(const SolutionIdea<CoordSet, ValueSet> &idea) const override {
             ValueSet s{};
             for (auto el : area) {
                 auto cell_set = idea.cells[el];
@@ -41,12 +41,11 @@ namespace sudoku {
     };
 
     template <class CoordSet, class ValueSet>
-    class SumConstraint : public Constraint {
+    class SumConstraint : public Constraint<CoordSet, ValueSet> {
     public:
-        SolutionIdea<CoordSet, ValueSet> idea;
         CoordSet area;
         typename ValueSet::value_type desired_sum;
-        bool check(void) const override {
+        bool check(const SolutionIdea<CoordSet, ValueSet> &idea) const override {
             typename ValueSet::value_type sum{};
             for (auto el : area) {
                 auto cell_set = idea.cells[el];
