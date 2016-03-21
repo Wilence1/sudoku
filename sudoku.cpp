@@ -57,4 +57,35 @@ namespace sudoku {
             return sum == desired_sum;
         }
     };
+
+    template <class CoordSet, class ValueSet>
+    class Strategy {
+    public:
+        Constraint<CoordSet, ValueSet> *constraint;
+        virtual bool advance(SolutionIdea<CoordSet, ValueSet> &) const = 0;
+    };
+
+    template <class CoordSet, class ValueSet>
+    class SumStrategy : public Strategy<CoordSet, ValueSet>{
+    public:
+        bool advance(SolutionIdea<CoordSet, ValueSet> &idea) const override {
+            typename ValueSet::value_type sum{};
+            typename CoordSet::value_type *missing = nullptr;
+            auto con = static_cast<SumConstraint<CoordSet, ValueSet>>(this->constraint);
+            for (auto el : con->area) {
+                auto cell_set = idea.cells[el];
+                if (cell_set.size() > 1) {
+                    if (missing) {
+                        return false;
+                    }
+                    missing = el;
+                } else {
+                    sum = sum + *cell_set.begin();
+                }
+            }
+            if (missing) {
+                idea.cells[missing] = ValueSet{con->desired_sum - sum};
+            }
+        }
+    };
 }
