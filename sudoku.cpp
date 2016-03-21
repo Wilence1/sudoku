@@ -4,8 +4,10 @@ namespace sudoku {
     template <class CoordSet, class ValueSet>
     class SolutionIdea {
     public:
+        // possible values for each cell
         std::map<typename CoordSet::value_type, ValueSet> cells;
         bool possible(void) const {
+            // checks whether all cells have any possibilities left
             for (auto el : cells) {
                 if (el->second.empty()) {
                     return false;
@@ -30,6 +32,8 @@ namespace sudoku {
             for (auto el : area) {
                 auto cell_set = idea.cells[el];
                 if (cell_set.size() > 1) {
+                    // skip processing this cell
+                    // we can still detect other collisions
                     continue;
                 }
                 if (!s.insert(*cell_set.begin()).second) {
