@@ -85,7 +85,9 @@ namespace sudoku {
             }
             if (missing) {
                 idea.cells[missing] = ValueSet{con->desired_sum - sum};
+                return true;
             }
+            return false;
         }
     };
 }
