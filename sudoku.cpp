@@ -70,15 +70,15 @@ namespace sudoku {
     };
 
     template <class CoordSet, class ValueSet>
-    class SumStrategy : public Strategy<CoordSet, ValueSet>{
+    class SumStrategy : public Strategy<CoordSet, ValueSet> {
     public:
         bool advance(SolutionIdea<CoordSet, ValueSet> &idea) const override {
+            auto con = static_cast<SumConstraint<CoordSet, ValueSet>*>(this->constraint);
             typename ValueSet::value_type sum{};
             typename CoordSet::value_type missing;
             bool found_missing = false;
-            auto con = static_cast<SumConstraint<CoordSet, ValueSet>*>(this->constraint);
             for (auto el : con->area) {
-                auto cell_set = idea.cells[el];
+                auto &cell_set = idea.cells[el];
                 if (cell_set.size() > 1) {
                     if (found_missing) {
                         return false;
@@ -94,6 +94,32 @@ namespace sudoku {
                 return true;
             }
             return false;
+        }
+    };
+
+    template <class CoordSet, class ValueSet>
+    class SimpleUniqueStrategy : public Strategy<CoordSet, ValueSet> {
+    public:
+        bool advance(SolutionIdea<CoordSet, ValueSet> &idea) const override {
+            auto con = static_cast<UniqueConstraint<CoordSet, ValueSet>*>(this->constraint);
+            bool result = false;
+            ValueSet found_values;
+            for (auto el : con->area) {
+                auto &cell_set = idea.cells[el];
+                if (cell_set.size() == 1) {
+                    found_values.insert(*cell_set.begin());
+                }
+            }
+            for (auto el : con->area) {
+                auto &cell_set = idea.cells[el];
+                if (cell_set.size() != 1) {
+                    for (auto val : found_values) {
+                        cell_set.erase(val);
+                        result = true;
+                    }
+                }
+            }
+            return result;
         }
     };
 }
