@@ -74,20 +74,22 @@ namespace sudoku {
     public:
         bool advance(SolutionIdea<CoordSet, ValueSet> &idea) const override {
             typename ValueSet::value_type sum{};
-            typename CoordSet::value_type *missing = nullptr;
-            auto con = static_cast<SumConstraint<CoordSet, ValueSet>>(this->constraint);
+            typename CoordSet::value_type missing;
+            bool found_missing = false;
+            auto con = static_cast<SumConstraint<CoordSet, ValueSet>*>(this->constraint);
             for (auto el : con->area) {
                 auto cell_set = idea.cells[el];
                 if (cell_set.size() > 1) {
-                    if (missing) {
+                    if (found_missing) {
                         return false;
                     }
                     missing = el;
+                    found_missing = true;
                 } else {
                     sum = sum + *cell_set.begin();
                 }
             }
-            if (missing) {
+            if (found_missing) {
                 idea.cells[missing] = ValueSet{con->desired_sum - sum};
                 return true;
             }
